@@ -24,11 +24,30 @@ const OpenAppointment = z
   required_error: "Please select a date and time",
   invalid_type_error: "That's not a date!",
 });*/
-//ez így full szar mivel valahogy gondoloma headerből kéne kiszedni
-// egy user id-t amjd csekkolni h egyáltalán orvos e
+
 export default asyncHandler(async (req: Request, res: Response) => {
   const dto = OpenAppointment.parse(req.body);
   const userId = req.user!.id;
+  //ide kéne egy logika ami megnézi h az orvosnak nincs e már időpontja
+  // ebben az idő intervallumba
+
+  const currentMedicOppenAppointment = await db
+    .selectFrom("openAppointments")
+    .where("mdId", "=", userId)
+    .where("startDate", "<", dto.endDate)
+    .where("endDate", ">", dto.startDate)
+    .selectAll()
+    .executeTakeFirst();
+
+  if (currentMedicOppenAppointment) {
+    console.log(currentMedicOppenAppointment);
+    res
+      .json({
+        message: "You already have an open appointment for this period.",
+      })
+      .sendStatus(400);
+    return;
+  }
 
   const openAppointment: NewOpenAppointment = {
     startDate: dto.startDate,

@@ -46,6 +46,10 @@ export default asyncHandler(async (req: Request, res: Response) => {
   }
 
   res.json({
-    accessToken: signAccessToken({ id: user.id, userName: user.userName }),
+    accessToken: signAccessToken({
+      id: user.id,
+      userName: user.userName,
+      role: user.role,
+    }),
   });
 });

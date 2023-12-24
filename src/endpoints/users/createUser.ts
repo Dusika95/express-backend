@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db } from "../../database";
 import { NewUser } from "../../types";
 import { pbkdf2Sync, randomBytes } from "crypto";
+import { hashPassword } from "../../middlewares/authentication";
 
 const User = z
   .object({
@@ -20,19 +21,23 @@ const User = z
 
 export default asyncHandler(async (req: Request, res: Response) => {
   const dto = User.parse(req.body);
+  //próbáltam ez még nem megy
+  //if(adminAuthcheck=req.user.role===admin){a lenti kód}
+  //else{res.sendstatus(403) return}
+  if (req.user!.role === "admin") {
+    const salt = randomBytes(16).toString("base64");
+    const passwordHash = hashPassword(salt, dto.password);
+    let user: NewUser = {
+      userName: dto.userName,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      role: "medic",
+      passwordHash: passwordHash,
+      salt: salt,
+    };
 
-  const salt = randomBytes(16);
-  const passwordHash = pbkdf2Sync(dto.password, salt, 310000, 32, "sha256");
-  let user: NewUser = {
-    userName: dto.userName,
-    firstName: dto.firstName,
-    lastName: dto.lastName,
-    role: "medic",
-    passwordHash: passwordHash.toString("base64"),
-    salt: salt.toString("base64"),
-  };
+    await db.insertInto("users").values(user).executeTakeFirstOrThrow();
 
-  await db.insertInto("users").values(user).executeTakeFirstOrThrow();
-
-  res.sendStatus(200);
+    res.sendStatus(200);
+  }
 });

@@ -3,26 +3,39 @@ import asyncHandler from "express-async-handler";
 
 import { db } from "../../database";
 
-interface BookedAppointmentsListDto {
+export interface BookedAppointmentsListDto {
   clientName: string;
   mdName: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
 }
-//vidd a resultra az egeret és fuzll mást add vissza mint a typeba lévő deffiniálás
+
 export default asyncHandler(async (req: Request, res: Response) => {
   const result = await db
     .selectFrom("bookedAppointments")
-    //.innerJoin("openAppointments","openAppointments.id","openAppointmentsId")
-    //.leftjoin("users","users.id","openAppointments.mdId")
-    .selectAll()
+    .leftJoin(
+      "openAppointments",
+      "openAppointments.id",
+      "bookedAppointments.openAppointmentId"
+    )
+    .leftJoin("users as muser", "muser.id", "openAppointments.mdId")
+    .leftJoin("users as cuser", "cuser.id", "bookedAppointments.clientId")
+    .select([
+      "cuser.firstName as clientFirstName",
+      "cuser.lastName as clientLastName",
+      "muser.firstName as medicFirstName",
+      "muser.lastName as medicLastName",
+      "startDate",
+      "endDate",
+    ])
     .execute();
 
   var response: BookedAppointmentsListDto[] = result.map((x) => ({
-    clientName: "bela",
-    mdName: "belaba",
-    startDate: x.startDate,
-    endDate: x.endDate,
+    clientName: `${x.clientFirstName} ${x.clientLastName}`,
+    mdName: `${x.medicFirstName} ${x.medicLastName}`,
+    startDate: x.startDate!.toISOString(),
+    endDate: x.endDate!.toISOString(),
   }));
+
   res.json(response);
 });

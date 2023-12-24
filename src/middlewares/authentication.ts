@@ -1,9 +1,11 @@
 import { verify, sign } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import { pbkdf2Sync, randomBytes } from "crypto";
 
 interface UserInfo {
   id: number;
   userName: string;
+  role: string;
 }
 
 function verifyAccessToken(token: string): {
@@ -22,23 +24,32 @@ function verifyAccessToken(token: string): {
   }
 }
 
-export function signAccessToken(user: { id: number; userName: string }) {
+export function signAccessToken(user: {
+  id: number;
+  userName: string;
+  role: string;
+}) {
   const secret = process.env.TOKEN_SECRET!.toString();
 
   const payload: UserInfo = {
     id: user.id,
     userName: user.userName,
-    //és ha ez így belene írva hogy?
-    //role: user.role
+    //NEM JÓ SAJNOS, fent átírtam az interfacet és a express.d.ts-t is hátha
+    role: user.role,
     //akkor pl a createuserbe írt commentem jó lehet e?
     //role: "tatata"
   };
+
+  // ez volt a terv nyílván vmi nem jó vele
 
   const token = sign(payload, secret, {
     expiresIn: "1h",
   });
 
   return token;
+}
+export function hashPassword(salt: string, password: string) {
+  return pbkdf2Sync(password, salt, 310000, 32, "sha256").toString("base64");
 }
 
 export function authenticateTokenMiddleware(

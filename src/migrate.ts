@@ -1,35 +1,16 @@
 import * as path from "path";
 import { promises as fs } from "fs";
-import { createPool } from "mysql2";
 import {
   Kysely,
   Migrator,
   FileMigrationProvider,
-  MysqlDialect,
   MigrationResult,
 } from "kysely";
 import { Database } from "./types";
-
-import * as dotenv from "dotenv";
-dotenv.config();
+import { db } from "./database";
 
 //ez itt lent most pontosan micsoda?furán nézz ki nekem aza function szerkezet
 function getMigrator(): { migrator: Migrator; db: Kysely<Database> } {
-  const dialect = new MysqlDialect({
-    pool: createPool({
-      database: process.env.DATABASE,
-      host: process.env.HOST,
-      user: process.env.USER,
-      password: process.env.PASSWORD,
-      port: Number(process.env.DB_PORT),
-      connectionLimit: 10,
-    }),
-  });
-
-  const db = new Kysely<Database>({
-    dialect,
-  });
-
   const migrator = new Migrator({
     db,
     provider: new FileMigrationProvider({
@@ -62,7 +43,7 @@ function handleMigrationError(
   }
 }
 
-async function migrateToLatest() {
+export async function migrateToLatest() {
   const { migrator, db } = getMigrator();
 
   const { error, results } = await migrator.migrateToLatest();

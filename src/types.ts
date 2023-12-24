@@ -9,15 +9,16 @@ import {
 export interface Database {
   users: UserTable;
   openAppointments: OpenAppointmentTable;
-  bookedAppointments: OpenAppointmentTable;
+  bookedAppointments: BookedAppointmentTable;
 }
 
+export type Role = "medic" | "client" | "admin";
 export interface UserTable {
   id: Generated<number>;
   firstName: string;
   lastName: string;
   userName: string;
-  role: "medic" | "client" | "admin";
+  role: Role;
   passwordHash: string;
   salt: string;
 }

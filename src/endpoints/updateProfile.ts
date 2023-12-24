@@ -18,8 +18,6 @@ const User = z
   });
 
 export default asyncHandler(async (req: Request, res: Response) => {
-  //ez kicsit kusza ezért kommentekezek
-  //itt az id alapján megtalálom a megváltoztatandó row-t
   const dto = User.parse(req.body);
 
   const id = req.user!.id;
@@ -33,7 +31,6 @@ export default asyncHandler(async (req: Request, res: Response) => {
     res.send("user not found on id: " + id);
     return;
   }
-  //berakom a fenti dto-t és a hashelés kreálást a jelszó változtatás miatt
 
   let passwordHash: string | undefined = undefined;
 

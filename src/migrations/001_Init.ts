@@ -31,6 +31,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       salt: salt.toString("base64"),
     })
     .executeTakeFirstOrThrow();
+
   await db.schema
     .createTable("openAppointments")
     .addColumn("id", "bigint", (col) => col.notNull().autoIncrement())
