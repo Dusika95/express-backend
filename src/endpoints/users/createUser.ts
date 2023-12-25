@@ -21,9 +21,7 @@ const User = z
 
 export default asyncHandler(async (req: Request, res: Response) => {
   const dto = User.parse(req.body);
-  //próbáltam ez még nem megy
-  //if(adminAuthcheck=req.user.role===admin){a lenti kód}
-  //else{res.sendstatus(403) return}
+
   if (req.user!.role === "admin") {
     const salt = randomBytes(16).toString("base64");
     const passwordHash = hashPassword(salt, dto.password);
@@ -39,5 +37,11 @@ export default asyncHandler(async (req: Request, res: Response) => {
     await db.insertInto("users").values(user).executeTakeFirstOrThrow();
 
     res.sendStatus(200);
+  } else {
+    res
+      .json({
+        message: "only admin user can be create a medic user",
+      })
+      .sendStatus(403);
   }
 });

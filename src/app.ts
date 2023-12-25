@@ -14,6 +14,8 @@ import getAllOpenAppointment from "./endpoints/openAppointments/getAllOpenAppoin
 import createBookedAppointment from "./endpoints/bookedAppointments/createBookedAppointment";
 import getAllBookedAppointment from "./endpoints/bookedAppointments/getAllBookedAppointment";
 import deleteBookedAppointment from "./endpoints/bookedAppointments/deleteBookedAppointment";
+import deleteAppointment from "./endpoints/openAppointments/deleteAppointment";
+import updateOpenAppointment from "./endpoints/openAppointments/updateOpenAppointment";
 
 const app = express();
 
@@ -25,11 +27,11 @@ app.use(cors());
 
 app.post("/users", authenticateTokenMiddleware, createUser);
 app.get("/users", authenticateTokenMiddleware, getAll);
-app.post("/users", authenticateTokenMiddleware, deleteUser);
+app.delete("/users", authenticateTokenMiddleware, deleteUser);
 
 app.post("/signup", signUp);
 app.post("/login", login);
-app.post("/profile", authenticateTokenMiddleware, updateProfile);
+app.put("/profile", authenticateTokenMiddleware, updateProfile);
 
 app.post(
   "/openappointments",
@@ -40,6 +42,16 @@ app.get(
   "/openappointments",
   authenticateTokenMiddleware,
   getAllOpenAppointment
+);
+app.delete(
+  "/openappointments/:id",
+  authenticateTokenMiddleware,
+  deleteAppointment
+);
+app.put(
+  "/openappointments/:id",
+  authenticateTokenMiddleware,
+  updateOpenAppointment
 );
 
 app.post(

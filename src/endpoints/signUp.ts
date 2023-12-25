@@ -4,8 +4,9 @@ import { z } from "zod";
 import { db } from "../database";
 import { NewUser } from "../types";
 import { pbkdf2Sync, randomBytes } from "crypto";
+import { hashPassword } from "../middlewares/authentication";
 
-const User = z
+export const User = z
   .object({
     userName: z.string().min(1),
     firstName: z.string().min(1),
@@ -21,16 +22,16 @@ const User = z
 export default asyncHandler(async (req: Request, res: Response) => {
   const dto = User.parse(req.body);
 
-  const salt = randomBytes(16);
-  const passwordHash = pbkdf2Sync(dto.password, salt, 310000, 32, "sha256");
+  const salt = randomBytes(16).toString("base64");
+  const passwordHash = hashPassword(salt, dto.password);
 
   let user: NewUser = {
     userName: dto.userName,
     firstName: dto.firstName,
     lastName: dto.lastName,
     role: "client",
-    passwordHash: passwordHash.toString("base64"),
-    salt: salt.toString("base64"),
+    passwordHash: passwordHash,
+    salt: salt,
   };
 
   await db.insertInto("users").values(user).executeTakeFirstOrThrow();

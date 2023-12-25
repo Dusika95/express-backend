@@ -1,5 +1,6 @@
 import { Kysely, sql } from "kysely";
 import { pbkdf2Sync, randomBytes } from "crypto";
+import { hashPassword } from "../middlewares/authentication";
 
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
@@ -18,8 +19,8 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addUniqueConstraint("users_user_name", ["userName"])
     .execute();
 
-  const salt = randomBytes(16);
-  const passwordHash = pbkdf2Sync("adminpassword", salt, 310000, 32, "sha256");
+  const salt = randomBytes(16).toString("base64");
+  const passwordHash = hashPassword(salt, "addminpassword");
   await db
     .insertInto("users")
     .values({
@@ -27,8 +28,8 @@ export async function up(db: Kysely<any>): Promise<void> {
       lastName: "Aladár",
       userName: "admin",
       role: "admin",
-      passwordHash: passwordHash.toString("base64"),
-      salt: salt.toString("base64"),
+      passwordHash: passwordHash,
+      salt: salt,
     })
     .executeTakeFirstOrThrow();
 

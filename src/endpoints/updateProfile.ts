@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db } from "../database";
 import { UserUpdate } from "../types";
 import { pbkdf2Sync } from "crypto";
+import { hashPassword } from "../middlewares/authentication";
 
 const User = z
   .object({
@@ -35,13 +36,7 @@ export default asyncHandler(async (req: Request, res: Response) => {
   let passwordHash: string | undefined = undefined;
 
   if (dto.password) {
-    passwordHash = pbkdf2Sync(
-      dto.password,
-      targetUser.salt,
-      310000,
-      32,
-      "sha256"
-    ).toString("base64");
+    passwordHash = hashPassword(targetUser.salt, dto.password);
   }
 
   const user: UserUpdate = {

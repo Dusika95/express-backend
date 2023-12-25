@@ -5,13 +5,10 @@ import { sql } from "kysely";
 import { db } from "../../database";
 import { NewOpenAppointment, NewUser, NewBookedAppointment } from "../../types";
 import { signAccessToken } from "../../middlewares/authentication";
+import { truncateTables } from "../../../test/utils";
 
 describe("Test get all Open appointment", () => {
-  beforeEach(async () => {
-    await sql`truncate table ${sql.table("bookedAppointments")}`.execute(db);
-    await sql`truncate table ${sql.table("openAppointments")}`.execute(db);
-    await sql`truncate table ${sql.table("users")}`.execute(db);
-  });
+  beforeEach(truncateTables);
 
   test("It should return empty list", async () => {
     const token = signAccessToken({
@@ -21,7 +18,7 @@ describe("Test get all Open appointment", () => {
     });
     const response = await supertest(app)
       .get("/openappointments")
-      .set("Authorization", "Bearer" + token);
+      .set("Authorization", "Bearer " + token);
 
     const data: OpenAppointmentListDto[] = response.body;
 

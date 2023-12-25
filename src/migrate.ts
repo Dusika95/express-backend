@@ -9,7 +9,6 @@ import {
 import { Database } from "./types";
 import { db } from "./database";
 
-//ez itt lent most pontosan micsoda?furán nézz ki nekem aza function szerkezet
 function getMigrator(): { migrator: Migrator; db: Kysely<Database> } {
   const migrator = new Migrator({
     db,
@@ -23,7 +22,7 @@ function getMigrator(): { migrator: Migrator; db: Kysely<Database> } {
 
   return { migrator, db };
 }
-//ezt sem igazán értem itt lejebb
+//nem igazán értem itt lejebb
 function handleMigrationError(
   results: MigrationResult[] | undefined,
   error: unknown

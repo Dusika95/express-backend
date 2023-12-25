@@ -34,13 +34,8 @@ export function signAccessToken(user: {
   const payload: UserInfo = {
     id: user.id,
     userName: user.userName,
-    //NEM JÓ SAJNOS, fent átírtam az interfacet és a express.d.ts-t is hátha
     role: user.role,
-    //akkor pl a createuserbe írt commentem jó lehet e?
-    //role: "tatata"
   };
-
-  // ez volt a terv nyílván vmi nem jó vele
 
   const token = sign(payload, secret, {
     expiresIn: "1h",
@@ -59,7 +54,7 @@ export function authenticateTokenMiddleware(
 ) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
-  //ezt az && dolgot nem értem
+
   if (!token) {
     return res.sendStatus(401);
   }

@@ -4,13 +4,10 @@ import { sql } from "kysely";
 import { db } from "../../database";
 import { NewOpenAppointment, NewUser, NewBookedAppointment } from "../../types";
 import { signAccessToken } from "../../middlewares/authentication";
+import { truncateTables } from "../../../test/utils";
 
 describe("Test delete a booked appointments", () => {
-  beforeEach(async () => {
-    await sql`truncate table ${sql.table("bookedAppointments")}`.execute(db);
-    await sql`truncate table ${sql.table("openAppointments")}`.execute(db);
-    await sql`truncate table ${sql.table("users")}`.execute(db);
-  });
+  beforeEach(truncateTables);
 
   test("It should be a statuscode 200 and do the deletetion", async () => {
     //create a client
@@ -22,6 +19,7 @@ describe("Test delete a booked appointments", () => {
       passwordHash: "dontcare",
       salt: "dontcare",
     };
+
     const { insertId: clientId } = await db
       .insertInto("users")
       .values(client)
@@ -35,6 +33,7 @@ describe("Test delete a booked appointments", () => {
       passwordHash: "dontcare",
       salt: "dontcare",
     };
+
     const { insertId: medicId } = await db
       .insertInto("users")
       .values(medic)

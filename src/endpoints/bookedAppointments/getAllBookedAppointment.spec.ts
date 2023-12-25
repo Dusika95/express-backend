@@ -5,13 +5,10 @@ import { sql } from "kysely";
 import { db } from "../../database";
 import { NewOpenAppointment, NewUser, NewBookedAppointment } from "../../types";
 import { signAccessToken } from "../../middlewares/authentication";
+import { truncateTables } from "../../../test/utils";
 
 describe("Test get all booked appointments", () => {
-  beforeEach(async () => {
-    await sql`truncate table ${sql.table("bookedAppointments")}`.execute(db);
-    await sql`truncate table ${sql.table("openAppointments")}`.execute(db);
-    await sql`truncate table ${sql.table("users")}`.execute(db);
-  });
+  beforeEach(truncateTables);
 
   test("It should return an empty list", async () => {
     // ACT

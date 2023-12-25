@@ -4,13 +4,10 @@ import { sql } from "kysely";
 import { db } from "../../database";
 import { NewUser } from "../../types";
 import { signAccessToken } from "../../middlewares/authentication";
+import { truncateTables } from "../../../test/utils";
 
 describe("Test get all booked appointments", () => {
-  beforeEach(async () => {
-    await sql`truncate table ${sql.table("bookedAppointments")}`.execute(db);
-    await sql`truncate table ${sql.table("openAppointments")}`.execute(db);
-    await sql`truncate table ${sql.table("users")}`.execute(db);
-  });
+  beforeEach(truncateTables);
 
   test("It should create a new medic user by admin", async () => {
     //create an admin user
@@ -49,5 +46,43 @@ describe("Test get all booked appointments", () => {
     const data: NewUser = response.body;
 
     expect(response.statusCode).toBe(200);
+  });
+  test("It should send back a 403 status because client cant create a medic user", async () => {
+    //create a client user
+    const client: NewUser = {
+      userName: "clientuser",
+      firstName: "Clerence",
+      lastName: "Client",
+      role: "client",
+      passwordHash: "dontcare",
+      salt: "dontcare",
+    };
+    const { insertId: clientId } = await db
+      .insertInto("users")
+      .values(client)
+      .executeTakeFirstOrThrow();
+
+    //ACT
+    const token = signAccessToken({
+      id: Number(clientId!),
+      userName: client!.userName,
+      role: client.role,
+    });
+    const requestBody = {
+      userName: "userdoctor",
+      firstName: "Daniel",
+      lastName: "Doctor",
+      password: "idontcare",
+      confirmPassword: "idontcare",
+    };
+
+    const response = await supertest(app)
+      .post("/users")
+      .set("Authorization", "Bearer " + token)
+      .send(requestBody);
+
+    const data: NewUser = response.body;
+
+    expect(response.statusCode).toBe(403);
   });
 });
